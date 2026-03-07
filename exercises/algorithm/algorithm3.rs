@@ -1,12 +1,44 @@
 /*
-	sort
-	This problem requires you to implement a sorting algorithm
-	you can use bubble sorting, insertion sorting, heap sorting, etc.
+    sort
+    This problem requires you to implement a sorting algorithm
+    you can use bubble sorting, insertion sorting, heap sorting, etc.
 */
-// I AM NOT DONE
+fn sort<T: PartialOrd + Clone>(slice: &mut [T]) {
+    let len = slice.len();
+    if len <= 1 {
+        return;
+    }
 
-fn sort<T>(array: &mut [T]){
-	//TODO
+    let mid = len / 2;
+
+    // Split and recurse
+    sort(&mut slice[..mid]);
+    sort(&mut slice[mid..]);
+
+    // Merge logic
+    let mut temp = Vec::with_capacity(len);
+    let (mut left, mut right) = (0, mid);
+
+    while left < mid && right < len {
+        if slice[left] <= slice[right] {
+            temp.push(slice[left].clone());
+            left += 1;
+        } else {
+            temp.push(slice[right].clone());
+            right += 1;
+        }
+    }
+
+    // Push remaining elements
+    if left < mid {
+        temp.extend_from_slice(&slice[left..mid]);
+    }
+    if right < len {
+        temp.extend_from_slice(&slice[right..len]);
+    }
+
+    // Copy back to original slice
+    slice.clone_from_slice(&temp);
 }
 #[cfg(test)]
 mod tests {
@@ -18,13 +50,13 @@ mod tests {
         sort(&mut vec);
         assert_eq!(vec, vec![19, 37, 46, 57, 64, 73, 75, 91]);
     }
-	#[test]
+    #[test]
     fn test_sort_2() {
         let mut vec = vec![1];
         sort(&mut vec);
         assert_eq!(vec, vec![1]);
     }
-	#[test]
+    #[test]
     fn test_sort_3() {
         let mut vec = vec![99, 88, 77, 66, 55, 44, 33, 22, 11];
         sort(&mut vec);

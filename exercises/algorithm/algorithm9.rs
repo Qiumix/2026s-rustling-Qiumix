@@ -1,9 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
-
 use std::cmp::Ord;
 use std::default::Default;
 
@@ -36,8 +34,23 @@ where
         self.len() == 0
     }
 
+    fn judge(&self, i1: &usize, i2: &usize) -> bool {
+        (self.comparator)(&self.items[*i1], &self.items[*i2])
+    }
+
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        let mut real_idx = self.items.len();
+        self.items.push(value);
+
+        while real_idx > 1 {
+            let par_idx = self.parent_idx(real_idx);
+            if self.judge(&par_idx, &real_idx) {
+                break;
+            }
+            self.items.swap(par_idx, real_idx);
+            real_idx = par_idx;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -56,9 +69,39 @@ where
         self.left_child_idx(idx) + 1
     }
 
-    fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+    fn most_child_idx(&self, idx: usize) -> usize {
+        let r = self.right_child_idx(idx);
+        let l = self.left_child_idx(idx);
+        if r <= self.count && self.judge(&r, &l) {
+            r
+        } else {
+            l
+        }
+    }
+
+    fn ok_compared_children(&self, idx: usize) -> bool {
+        if !self.children_present(idx) {
+            return true;
+        }
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+        
+        if right_idx <= self.count {
+            self.judge(&idx, &left_idx) && self.judge(&idx, &right_idx)
+        } else {
+            self.judge(&idx, &left_idx)
+        }
+    }
+    fn bubble_down(&mut self, idx: usize) {
+        let mut idx = idx;
+        loop {
+            if self.ok_compared_children(idx) {
+                return;
+            }
+            let child_idx = self.most_child_idx(idx);
+            self.items.swap(idx, child_idx);
+            idx = child_idx;
+        }
     }
 }
 
@@ -84,8 +127,16 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        self.items.swap(1, self.count);
+        self.count -= 1;
+        let top_item = self.items.pop();
+        if !self.is_empty() {
+            self.bubble_down(1);
+        }
+        top_item
     }
 }
 
